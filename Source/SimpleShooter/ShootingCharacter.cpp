@@ -16,6 +16,8 @@ AShootingCharacter::AShootingCharacter()
 void AShootingCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	Health = MaxHealth;
+	  
 	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);
 	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("weapon_rSocket"));
@@ -42,6 +44,15 @@ void AShootingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	PlayerInputComponent->BindAxis("LookRightRate",this, &AShootingCharacter::LookRightRate);
 	PlayerInputComponent->BindAction("Jump", EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Shoot", EInputEvent::IE_Pressed, this, &AShootingCharacter::Shoot);
+}
+
+float AShootingCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController *EventInstigator, AActor *DamageCauser)
+{
+	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	DamageToApply = FMath::Min(Health, DamageToApply);
+	Health -= DamageToApply;
+	UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
+	return DamageToApply;
 }
 
 void AShootingCharacter::MoveForward(float AxisValue)
