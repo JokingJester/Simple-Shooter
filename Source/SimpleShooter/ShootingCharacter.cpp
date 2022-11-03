@@ -32,6 +32,11 @@ void AShootingCharacter::Tick(float DeltaTime)
 
 }
 
+bool AShootingCharacter::IsDead() const
+{
+	return Health <= 0;
+}
+
 // Called to bind functionality to input
 void AShootingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
