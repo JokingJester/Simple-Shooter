@@ -37,6 +37,7 @@ void AGun::Tick(float DeltaTime)
 void AGun::PullTrigger()
 {
 	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
+	UGameplayStatics::SpawnSoundAttached(MuzzleSound, Mesh, TEXT("MuzzleFlashSocket"));
 	FHitResult HitInfo;
 	FVector ShotDirection;
 	bool Success = GunTrace(HitInfo, ShotDirection);
@@ -49,6 +50,7 @@ void AGun::PullTrigger()
 		if (HitActor != nullptr)
 		{
 			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+			UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ImpactSound, HitInfo.Location);
 		}
 	}
 }
