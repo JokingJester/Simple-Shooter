@@ -37,31 +37,43 @@ void AGun::Tick(float DeltaTime)
 void AGun::PullTrigger()
 {
 	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr) return;
-	AController* OwnerController = OwnerPawn->GetController();
-
-	if (OwnerController == nullptr) return;
-	FVector Location;
-	FRotator Rotation;
-	OwnerController->GetPlayerViewPoint(Location, Rotation);
-
-	FVector End = Location + Rotation.Vector() * MaxRange;
 	FHitResult HitInfo;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
-	Params.AddIgnoredActor(GetOwner());
-	bool Sucess = GetWorld()->LineTraceSingleByChannel(HitInfo, Location, End, ECC_GameTraceChannel1, Params);
-	if (Sucess)
+	FVector ShotDirection;
+	bool Success = GunTrace(HitInfo, ShotDirection);
+	if (Success)
 	{
-		FVector ShotDirection = -Rotation.Vector();
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, HitInfo.Location, ShotDirection.Rotation());
 		FPointDamageEvent DamageEvent(Damage, HitInfo, ShotDirection, nullptr);
+		AController* OwnerController = GetOwnerController();
 		AActor* HitActor = HitInfo.GetActor();
 		if (HitActor != nullptr)
 		{
 			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
 		}
 	}
+}
+
+bool AGun::GunTrace(FHitResult& HitInfo, FVector& ShotDirection)
+{
+	AController* OwnerController = GetOwnerController();
+	if (OwnerController == nullptr) return false;
+	FVector Location;
+	FRotator Rotation;
+	OwnerController->GetPlayerViewPoint(Location, Rotation);
+	ShotDirection = -Rotation.Vector();
+
+	FVector End = Location + Rotation.Vector() * MaxRange;
+	HitInfo;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(GetOwner());
+	return GetWorld()->LineTraceSingleByChannel(HitInfo, Location, End, ECC_GameTraceChannel1, Params);
+}
+
+AController* AGun::GetOwnerController() const
+{
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn == nullptr) return nullptr;
+	return OwnerPawn->GetController();
 }
 
