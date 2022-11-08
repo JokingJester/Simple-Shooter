@@ -23,13 +23,9 @@ void AKillThemAllGameMode::PawnKilled(APawn* PawnKilled)
 		{
 			return;
 		}
-		EndGame(true);
 	}
-	//for loop over shooter ai in world
-	  //is not dead?
-	    //return
-		
-	//end game
+
+	EndGame(true);
 }
 
 void AKillThemAllGameMode::EndGame(bool bIsPlayerWinner)
